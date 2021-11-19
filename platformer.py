@@ -70,7 +70,6 @@ def put_text(size, text, font, surface, x, y):
     text_rect = text.get_rect()
     text_rect.center = x, y
     surface.blit(text, text_rect)
-    pygame.display.flip()
 
 
 def start_text(text, font, surface):
@@ -96,16 +95,16 @@ time.sleep(1)
 
 start = True
 
-put_text(100, 'PRESS SPACE TO PLAY', 'TitilliumWeb-Light.ttf',
-         screen, screen_width/2, screen_height/2)
-
 while start == True:
+    put_text(100, 'PRESS SPACE TO PLAY', 'TitilliumWeb-Light.ttf',
+             screen, screen_width/2, screen_height/2)
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 start = False
         if event.type == pygame.QUIT:
             pygame.quit()
+    pygame.display.flip()
 
 screen.fill((0, 0, 0))
 
@@ -136,9 +135,6 @@ while True:
         if len(enemies) == 0:
             enemies.append(Enemy(screen_width/2, screen_height /
                                  2, 0.5, 0, (255, 0, 0), 35))
-    if level == 1:
-        put_text(30, 'YOU CAN WALL JUMP',
-                 'TitilliumWeb-Light.ttf', screen, 1100, 500)
     if player.rect.right >= screen_width:
         level += 1
         player.rect.x = 100
@@ -169,7 +165,9 @@ while True:
         item.prevx = item.rect.x
         item.prevy = item.rect.y
     screen.fill((0, 0, 0))
-
+    if level == 1:
+        put_text(30, 'YOU CAN WALL JUMP',
+                 'TitilliumWeb-Light.ttf', screen, 1100, 500)
     for item in levels[level]:
         item.draw(screen)
     for item in enemies:
