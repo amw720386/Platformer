@@ -37,17 +37,25 @@ class Character:
 
 
 class Enemy:
-    def __init__(self, x, y, gravity, velocity, color, size):
+    def __init__(self, x, y, gravity, velocity, color, size, travelLen, speed):
         self.rect = pygame.Rect(x, y, size, size)
         self.velocity = velocity
         self.gravity = gravity
         self.color = color
         self.prevx = self.rect.x
         self.prevy = self.rect.y
+        self.travelLen = travelLen
+        self.originx = x
+        self.speed = speed
 
     def update(self):
         self.rect.y += self.velocity
         self.velocity += self.gravity
+        if self.rect.x >= self.originx + self.travelLen:
+            self.speed *= -1
+        elif self.rect.x <= self.originx:
+            self.speed *= -1
+        self.rect.x += self.speed
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
@@ -137,8 +145,8 @@ while True:
 
     if level == 3:
         if len(enemies) == 0:
-            enemies = [Enemy(screen_width/2, screen_height /
-                             2, 0.5, 0, (255, 0, 0), 35)]
+            enemies = [Enemy((screen_width/2)-190, screen_height /
+                             2, 0.5, 0, (255, 0, 0), 35, 500, 5)]
     if player.rect.right >= screen_width:
         level += 1
         player.rect.x = 100
