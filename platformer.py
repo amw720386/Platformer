@@ -62,6 +62,9 @@ class Avatar(Character):
     def update(self):
         self.rect.y += self.velocity
         self.velocity += self.gravity
+        if self.rect.y >= screen_height:
+            time.sleep(0.2)
+            pygame.quit()
 
 
 def put_text(size, text, font, surface, x, y):
@@ -72,26 +75,27 @@ def put_text(size, text, font, surface, x, y):
     surface.blit(text, text_rect)
 
 
-def start_text(text, font, surface):
-    font = pygame.font.Font(font, 200)
-    text = font.render(text, True, (255, 255, 255))
-    text_rect = text.get_rect()
-    text_rect.center = (screen_width / 2, screen_height / 2)
-    surface.blit(text, text_rect)
+gameName = 'SIMPLE'
+
+for index in range(0, len(gameName)):
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+    put_text(200, gameName[0:index+1], 'TitilliumWeb-Light.ttf',
+             screen, screen_width/2, screen_height/2)
     pygame.display.flip()
     time.sleep(0.4)
+    if gameName[0:index+1] == gameName:
+        time.sleep(0.4)
+        put_text(75, 'PLATFORMER', 'TitilliumWeb-Light.ttf',
+                 screen, screen_width/2, (screen_height/2)+125)
+        pygame.display.flip()
+        time.sleep(0.7)
+        put_text(50, 'PHYSICS', 'TitilliumWeb-Light.ttf',
+                 screen, screen_width/2, (screen_height/2)+190)
+        pygame.display.flip()
+        time.sleep(1.5)
     screen.fill((0, 0, 0))
-
-
-start_text('S', 'TitilliumWeb-Light.ttf', screen)
-start_text('SI', 'TitilliumWeb-Light.ttf', screen)
-start_text('SIM', 'TitilliumWeb-Light.ttf', screen)
-start_text('SIMP', 'TitilliumWeb-Light.ttf', screen)
-start_text('SIMPL', 'TitilliumWeb-Light.ttf', screen)
-start_text('SIMPLE', 'TitilliumWeb-Light.ttf', screen)
-start_text('SIMPLE.', 'TitilliumWeb-Light.ttf', screen)
-time.sleep(1)
-
 
 start = True
 
@@ -105,14 +109,13 @@ while start == True:
         if event.type == pygame.QUIT:
             pygame.quit()
     pygame.display.flip()
-
 screen.fill((0, 0, 0))
 
 player = Avatar(screen_width/2, screen_height /
                 2, 0.5, 0, (255, 255, 255), 35)
 
-levels = {1: [Platform((screen_width/2) - 300/2, (screen_height/2)+50, 300, 100, (210, 180, 140), False), Platform(375, (screen_height/2)+50, 115, 100, (255, 0, 0), True),
-          Platform(50, (screen_height/2)+200, 900, 100, (210, 180, 140), False), Platform(960, 51, 10, 399, (255, 0, 0), True), Platform(970, 50, 30, 400, (210, 180, 140), False)], 2: [Platform(0, 100, 300, 30, (210, 180, 140), False), Platform(0, 130, 300, 570, (255, 0, 0), True), Platform(0, 320, 330, 150, (255, 0, 0), True), Platform(400, 0, 880, 600, (250, 0, 0), True), Platform(370, 580, 400, 20, (250, 0, 0), True), Platform(300, 650, 980, 50, (210, 180, 140), False)], 3: [Platform(0, 100, 300, 600, (210, 180, 140), False), Platform(300, 500, 980, 200, (210, 180, 140), False)]}
+levels = {1: [Platform((screen_width/2) - 300/2, (screen_height/2)+50, 300, 100, (210, 180, 140), False),
+              Platform(50, (screen_height/2)+200, 900, 100, (210, 180, 140), False), Platform(970, 50, 30, 400, (210, 180, 140), False)], 2: [Platform(0, 100, 300, 30, (210, 180, 140), False), Platform(0, 130, 300, 570, (255, 0, 0), True), Platform(0, 320, 330, 150, (255, 0, 0), True), Platform(400, 0, 880, 600, (250, 0, 0), True), Platform(370, 580, 400, 20, (250, 0, 0), True), Platform(300, 650, 980, 50, (210, 180, 140), False)], 3: [Platform(0, 100, 300, 600, (210, 180, 140), False), Platform(300, 500, 980, 200, (210, 180, 140), False)]}
 
 enemies = []
 
@@ -131,18 +134,15 @@ while True:
                 player.jumps = 1
 
     player.update()
+
     if level == 3:
         if len(enemies) == 0:
-            enemies.append(Enemy(screen_width/2, screen_height /
-                                 2, 0.5, 0, (255, 0, 0), 35))
+            enemies = [Enemy(screen_width/2, screen_height /
+                             2, 0.5, 0, (255, 0, 0), 35)]
     if player.rect.right >= screen_width:
         level += 1
         player.rect.x = 100
         player.rect.y = 50
-        enemies = []
-    if player.rect.y >= screen_height:
-        time.sleep(0.2)
-        pygame.quit()
     for item in levels[level]:
         if collide_rect(item, player):
             if item.killer == True:
@@ -159,17 +159,36 @@ while True:
             if collide_rect(item, platform):
                 item.rect.x = item.prevx
                 item.rect.y = item.prevy
+                item.velocity = 0
     player.prevx = player.rect.x
     player.prevy = player.rect.y
     for item in enemies:
         item.prevx = item.rect.x
         item.prevy = item.rect.y
     screen.fill((0, 0, 0))
-    if level == 1:
-        put_text(30, 'YOU CAN WALL JUMP',
-                 'TitilliumWeb-Light.ttf', screen, 1100, 500)
+
     for item in levels[level]:
         item.draw(screen)
+
+    if level == 1:
+        if player.rect.x > (screen_width/2) + 150:
+            put_text(30, 'YOU CAN WALL JUMP',
+                     'TitilliumWeb-Light.ttf', screen, 1100, 500)
+        else:
+            put_text(30, 'USE ARROWS TO MOVE AROUND',
+                     'TitilliumWeb-Light.ttf', screen, screen_width/2, (screen_height/2) - 100)
+            put_text(30, 'GO TO THE RIGHT SIDE OF THE',
+                     'TitilliumWeb-Light.ttf', screen, screen_width/2, (screen_height/2) - 70)
+            put_text(30, 'SCREEN TO COMPLETE THE LEVEL',
+                     'TitilliumWeb-Light.ttf', screen, screen_width/2, (screen_height/2) - 40)
+    if level == 2:
+        if player.rect.y > 600:
+            put_text(30, 'YOU DID IT :D',
+                     'TitilliumWeb-Light.ttf', screen, 800, 625)
+        else:
+            put_text(30, 'DONT TOUCH RED :)',
+                     'TitilliumWeb-Light.ttf', screen, 800, 625)
+
     for item in enemies:
         item.draw(screen)
     player.draw(screen)
