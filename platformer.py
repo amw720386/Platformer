@@ -37,7 +37,7 @@ class Character:
 
 
 class Enemy:
-    def __init__(self, x, y, gravity, velocity, color, size, travelLen, speed):
+    def __init__(self, x, y, gravity, velocity, color, size, travelLen, speed, jump):
         self.rect = pygame.Rect(x, y, size, size)
         self.velocity = velocity
         self.gravity = gravity
@@ -47,8 +47,12 @@ class Enemy:
         self.travelLen = travelLen
         self.originx = x
         self.speed = speed
+        self.ifjump = random.choices(['yes', 'no'], weights=[1, 25])
+        self.jump = jump
+        self.canjump = True
 
     def update(self):
+        self.ifjump = random.randint(0, 30)
         self.rect.y += self.velocity
         self.velocity += self.gravity
         if self.rect.x >= self.originx + self.travelLen:
@@ -56,6 +60,10 @@ class Enemy:
         elif self.rect.x <= self.originx:
             self.speed *= -1
         self.rect.x += self.speed
+        if self.jump == True:
+            if self.ifjump == 1 and self.canjump == True:
+                self.velocity -= 11
+                self.canjump = False
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
@@ -146,7 +154,7 @@ while True:
     if level == 3:
         if len(enemies) == 0:
             enemies = [Enemy((screen_width/2)-190, screen_height /
-                             2, 0.5, 0, (255, 0, 0), 35, 500, 5)]
+                             2, 0.5, 0, (255, 0, 0), 35, 500, 5, True)]
     if player.rect.right >= screen_width:
         level += 1
         player.rect.x = 100
@@ -165,6 +173,7 @@ while True:
         item.update()
         for platform in levels[level]:
             if collide_rect(item, platform):
+                item.canjump = True
                 item.rect.x = item.prevx
                 item.rect.y = item.prevy
                 item.velocity = 0
