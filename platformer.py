@@ -80,9 +80,9 @@ class Avatar(Character):
     def update(self):
         self.rect.y += self.velocity
         self.velocity += self.gravity
-        if self.rect.y >= screen_height:
-            time.sleep(0.2)
-            pygame.quit()
+
+
+gamefont = 'TitilliumWeb-Light.ttf'
 
 
 def put_text(size, text, font, surface, x, y):
@@ -93,23 +93,43 @@ def put_text(size, text, font, surface, x, y):
     surface.blit(text, text_rect)
 
 
+def gameEnd():
+    player.velocity = 0
+    player.rect.x = startPos[1][0]
+    player.rect.y = startPos[1][1]
+    screen.fill((0, 0, 0))
+    put_text(200, 'GAME OVER', gamefont, screen,
+             screen_width/2, screen_height/2)
+    pygame.display.flip()
+    time.sleep(1)
+    put_text(75, 'RESTARTING', gamefont,
+                 screen, screen_width/2, (screen_height/2)+140)
+    pygame.display.flip()
+    time.sleep(3)
+
+
+def restart():
+    player.rect.x = startPos[level][0]
+    player.rect.y = startPos[level][1]
+
+
 gameName = 'SIMPLE'
 
 for index in range(0, len(gameName)):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-    put_text(200, gameName[0:index+1], 'TitilliumWeb-Light.ttf',
+    put_text(200, gameName[0:index+1], gamefont,
              screen, screen_width/2, screen_height/2)
     pygame.display.flip()
     time.sleep(0.4)
     if gameName[0:index+1] == gameName:
         time.sleep(0.4)
-        put_text(75, 'PLATFORMER', 'TitilliumWeb-Light.ttf',
+        put_text(75, 'PLATFORMER', gamefont,
                  screen, screen_width/2, (screen_height/2)+125)
         pygame.display.flip()
         time.sleep(0.7)
-        put_text(50, 'PHYSICS', 'TitilliumWeb-Light.ttf',
+        put_text(50, 'PHYSICS', gamefont,
                  screen, screen_width/2, (screen_height/2)+190)
         pygame.display.flip()
         time.sleep(1.5)
@@ -118,7 +138,7 @@ for index in range(0, len(gameName)):
 start = True
 
 while start == True:
-    put_text(100, 'PRESS SPACE TO PLAY', 'TitilliumWeb-Light.ttf',
+    put_text(100, 'PRESS SPACE TO PLAY', gamefont,
              screen, screen_width/2, screen_height/2)
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -133,8 +153,12 @@ player = Avatar(screen_width/2, screen_height /
                 2, 0.5, 0, (255, 255, 255), 35)
 
 levels = {1: [Platform((screen_width/2) - 300/2, (screen_height/2)+50, 300, 100, (210, 180, 140), False),
-              Platform(50, (screen_height/2)+200, 900, 100, (210, 180, 140), False), Platform(970, 50, 30, 400, (210, 180, 140), False)], 2: [Platform(0, 100, 300, 30, (210, 180, 140), False), Platform(0, 130, 300, 570, (255, 0, 0), True), Platform(0, 320, 330, 150, (255, 0, 0), True), Platform(400, 0, 880, 600, (250, 0, 0), True), Platform(370, 580, 400, 20, (250, 0, 0), True), Platform(300, 650, 980, 50, (210, 180, 140), False)], 3: [Platform(0, 100, 300, 600, (210, 180, 140), False), Platform(300, 500, 980, 200, (210, 180, 140), False)]}
+              Platform(50, (screen_height/2)+200, 900, 100, (210, 180, 140), False), Platform(970, 50, 30, 400, (210, 180, 140), False)], 2: [Platform(0, 100, 300, 30, (210, 180, 140), False), Platform(0, 130, 300, 570, (255, 0, 0), True), Platform(0, 320, 330, 150, (255, 0, 0), True), Platform(400, 0, 880, 600, (250, 0, 0), True), Platform(370, 580, 400, 20, (250, 0, 0), True), Platform(300, 650, 980, 50, (210, 180, 140), False)], 3: [Platform(0, 100, 300, 600, (210, 180, 140), False), Platform(300, 500, 980, 200, (210, 180, 140), False)], 4: [Platform(0, 100, 300, 600, (210, 180, 140), False)]}
 
+startPos = {1: [screen_width/2, screen_height/2],
+            2: [100, 50], 3: [100, 50], 4: [100, 50]}
+
+lives = 3
 enemies = []
 
 while True:
@@ -153,29 +177,53 @@ while True:
 
     player.update()
 
+    if player.rect.y >= screen_height:
+        if lives == 1:
+            level = 1
+            lives = 3
+            gameEnd()
+        else:
+            lives -= 1
+            restart()
     if level == 3:
         if len(enemies) == 0:
             enemies = [Enemy((screen_width/2)-190, screen_height /
                              2, 0.5, 0, (255, 0, 0), 35, 550, 3, True)]
     if player.rect.right >= screen_width:
         level += 1
-        player.rect.x = 100
-        player.rect.y = 50
+        player.rect.x = startPos[level][0]
+        player.rect.y = startPos[level][1]
+        enemies = []
     for item in levels[level]:
         if collide_rect(item, player):
             if item.killer == True:
-                time.sleep(0.2)
-                pygame.quit()
+                if lives == 1:
+                    item.killer = False
+                    player.prevx = startPos[level][0]
+                    player.prevy = startPos[level][1]
+                    level = 1
+                    lives = 3
+                    gameEnd()
+                else:
+                    player.prevx = startPos[level][0]
+                    player.prevy = startPos[level][1]
+                    lives -= 1
+                    restart()
             player.jumps = 0
             player.velocity = 0
-            if collide_rect(item, player):
-                player.rect.x = player.prevx
-                player.rect.y = player.prevy
+            player.rect.x = player.prevx
+            player.rect.y = player.prevy
     for item in enemies:
         item.update()
         if collide_rect(player, item):
-            time.sleep(0.2)
-            pygame.quit()
+            if lives == 1:
+                level = 1
+                lives = 3
+                time.sleep(0.2)
+                gameEnd()
+            else:
+                lives -= 1
+                restart()
         for platform in levels[level]:
             if collide_rect(item, platform):
                 item.canjump = True
@@ -192,26 +240,27 @@ while True:
     for item in levels[level]:
         item.draw(screen)
 
+    put_text(40, f'LIVES: {lives}', gamefont, screen, 75, 25)
     if level == 1:
         if player.rect.x > (screen_width/2) + 150:
             put_text(30, 'YOU CAN WALL JUMP',
-                     'TitilliumWeb-Light.ttf', screen, 1100, 500)
+                     gamefont, screen, 1100, 500)
         else:
             put_text(30, 'USE ARROWS TO MOVE AROUND',
-                     'TitilliumWeb-Light.ttf', screen, screen_width/2, (screen_height/2) - 100)
+                     gamefont, screen, screen_width/2, (screen_height/2) - 100)
             put_text(30, 'GO TO THE RIGHT SIDE OF THE',
-                     'TitilliumWeb-Light.ttf', screen, screen_width/2, (screen_height/2) - 70)
+                     gamefont, screen, screen_width/2, (screen_height/2) - 70)
             put_text(30, 'SCREEN TO COMPLETE THE LEVEL',
-                     'TitilliumWeb-Light.ttf', screen, screen_width/2, (screen_height/2) - 40)
+                     gamefont, screen, screen_width/2, (screen_height/2) - 40)
     if level == 2:
         if player.rect.y > 600:
             put_text(30, 'YOU DID IT :D',
-                     'TitilliumWeb-Light.ttf', screen, 800, 625)
+                     gamefont, screen, 800, 625)
         else:
             put_text(30, 'DONT TOUCH RED :)',
-                     'TitilliumWeb-Light.ttf', screen, 800, 625)
+                     gamefont, screen, 800, 625)
     if level == 3:
-        put_text(30, 'DONT TOUCH ENEMIES', 'TitilliumWeb-Light.ttf',
+        put_text(30, 'DONT TOUCH ENEMIES', gamefont,
                  screen, (screen_width/2) + 175, (screen_height/2)-175)
 
     for item in enemies:
