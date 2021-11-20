@@ -57,12 +57,14 @@ class Enemy:
         self.velocity += self.gravity
         if self.rect.x >= self.originx + self.travelLen:
             self.speed *= -1
+            self.rect.x -= 10
         elif self.rect.x <= self.originx:
             self.speed *= -1
+            self.rect.x += 10
         self.rect.x += self.speed
         if self.jump == True:
             if self.ifjump == 1 and self.canjump == True:
-                self.velocity -= 11
+                self.velocity -= 10
                 self.canjump = False
 
     def draw(self, screen):
@@ -154,7 +156,7 @@ while True:
     if level == 3:
         if len(enemies) == 0:
             enemies = [Enemy((screen_width/2)-190, screen_height /
-                             2, 0.5, 0, (255, 0, 0), 35, 500, 5, True)]
+                             2, 0.5, 0, (255, 0, 0), 35, 550, 5, True)]
     if player.rect.right >= screen_width:
         level += 1
         player.rect.x = 100
@@ -171,6 +173,9 @@ while True:
                 player.rect.y = player.prevy
     for item in enemies:
         item.update()
+        if collide_rect(player, item):
+            time.sleep(0.2)
+            pygame.quit()
         for platform in levels[level]:
             if collide_rect(item, platform):
                 item.canjump = True
@@ -205,6 +210,9 @@ while True:
         else:
             put_text(30, 'DONT TOUCH RED :)',
                      'TitilliumWeb-Light.ttf', screen, 800, 625)
+    if level == 3:
+        put_text(30, 'DONT TOUCH ENEMIES', 'TitilliumWeb-Light.ttf',
+                 screen, (screen_width/2) + 175, (screen_height/2)-175)
 
     for item in enemies:
         item.draw(screen)
