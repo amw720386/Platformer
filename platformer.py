@@ -52,7 +52,7 @@ class Enemy:
         self.canjump = True
 
     def update(self):
-        self.ifjump = random.randint(0, 30)
+        self.ifjump = random.randint(0, 60)
         self.rect.y += self.velocity
         self.velocity += self.gravity
         if self.rect.x >= self.originx + self.travelLen:
@@ -156,7 +156,7 @@ while True:
     if level == 3:
         if len(enemies) == 0:
             enemies = [Enemy((screen_width/2)-190, screen_height /
-                             2, 0.5, 0, (255, 0, 0), 35, 550, 5, True)]
+                             2, 0.5, 0, (255, 0, 0), 35, 550, 3, True)]
     if player.rect.right >= screen_width:
         level += 1
         player.rect.x = 100
