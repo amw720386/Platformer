@@ -113,6 +113,12 @@ def restart():
     player.rect.y = startPos[level][1]
 
 
+def draw_rect_alpha(surface, color, rect):
+    shape_surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
+    pygame.draw.rect(shape_surface, color, shape_surface.get_rect())
+    surface.blit(shape_surface, rect)
+
+
 gameName = 'SIMPLE'
 
 for index in range(0, len(gameName)):
@@ -181,6 +187,7 @@ while True:
         if lives == 1:
             level = 1
             lives = 3
+            enemies = []
             gameEnd()
         else:
             lives -= 1
@@ -199,10 +206,11 @@ while True:
             if item.killer == True:
                 if lives == 1:
                     item.killer = False
+                    level = 1
                     player.prevx = startPos[level][0]
                     player.prevy = startPos[level][1]
-                    level = 1
                     lives = 3
+                    enemies = []
                     gameEnd()
                 else:
                     player.prevx = startPos[level][0]
@@ -219,7 +227,7 @@ while True:
             if lives == 1:
                 level = 1
                 lives = 3
-                time.sleep(0.2)
+                enemies = []
                 gameEnd()
             else:
                 lives -= 1
