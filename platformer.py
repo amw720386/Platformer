@@ -1,5 +1,4 @@
 import random
-from typing import Text
 import pygame
 import time
 from pygame.sprite import collide_rect
@@ -12,6 +11,8 @@ screen_height = 700
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Platformer')
 level = 1
+BEIGE = (210, 180, 140)
+RED = (255, 0, 0)
 
 
 class Platform:
@@ -37,7 +38,7 @@ class Character:
 
 
 class Enemy:
-    def __init__(self, x, y, gravity, velocity, color, size, travelLen, speed, jump):
+    def __init__(self, x, y, gravity, velocity, color, size, travelLen, speed, jump, walk):
         self.rect = pygame.Rect(x, y, size, size)
         self.velocity = velocity
         self.gravity = gravity
@@ -47,21 +48,23 @@ class Enemy:
         self.travelLen = travelLen
         self.originx = x
         self.speed = speed
-        self.ifjump = random.choices(['yes', 'no'], weights=[1, 25])
+        self.ifjump = ''
         self.jump = jump
+        self.walk = walk
         self.canjump = True
 
     def update(self):
         self.ifjump = random.randint(0, 60)
         self.rect.y += self.velocity
         self.velocity += self.gravity
-        if self.rect.x >= self.originx + self.travelLen:
-            self.speed *= -1
-            self.rect.x -= 10
-        elif self.rect.x <= self.originx:
-            self.speed *= -1
-            self.rect.x += 10
-        self.rect.x += self.speed
+        if self.walk == True:
+            if self.rect.x >= self.originx + self.travelLen:
+                self.speed *= -1
+                self.rect.x -= 10
+            elif self.rect.x <= self.originx:
+                self.speed *= -1
+                self.rect.x += 10
+            self.rect.x += self.speed
         if self.jump == True:
             if self.ifjump == 1 and self.canjump == True:
                 self.velocity -= 10
@@ -101,11 +104,11 @@ def gameEnd():
     put_text(200, 'GAME OVER', gamefont, screen,
              screen_width/2, screen_height/2)
     pygame.display.flip()
-    time.sleep(1)
+    time.sleep(0.5)
     put_text(75, 'RESTARTING', gamefont,
                  screen, screen_width/2, (screen_height/2)+140)
     pygame.display.flip()
-    time.sleep(3)
+    time.sleep(2)
 
 
 def restart():
@@ -155,14 +158,21 @@ while start == True:
     pygame.display.flip()
 screen.fill((0, 0, 0))
 
-player = Avatar(screen_width/2, screen_height /
-                2, 0.5, 0, (255, 255, 255), 35)
-
-levels = {1: [Platform((screen_width/2) - 300/2, (screen_height/2)+50, 300, 100, (210, 180, 140), False),
-              Platform(50, (screen_height/2)+200, 900, 100, (210, 180, 140), False), Platform(970, 50, 30, 400, (210, 180, 140), False)], 2: [Platform(0, 100, 300, 30, (210, 180, 140), False), Platform(0, 130, 300, 570, (255, 0, 0), True), Platform(0, 320, 330, 150, (255, 0, 0), True), Platform(400, 0, 880, 600, (250, 0, 0), True), Platform(370, 580, 400, 20, (250, 0, 0), True), Platform(300, 650, 980, 50, (210, 180, 140), False)], 3: [Platform(0, 100, 300, 600, (210, 180, 140), False), Platform(300, 500, 980, 200, (210, 180, 140), False)], 4: [Platform(0, 100, 300, 600, (210, 180, 140), False)]}
-
 startPos = {1: [screen_width/2, screen_height/2],
-            2: [100, 50], 3: [100, 50], 4: [100, 50]}
+            2: [100, 50], 3: [100, 50], 4: [100, 50], 5: [100, 600], 6: [100, 350], 7: [100, 50], 8: [100, 550]}
+
+player = Avatar(startPos[level][0], startPos[level]
+                [1], 0.5, 0, (255, 255, 255), 35)
+
+levels = {1: [Platform((screen_width/2) - 300/2, (screen_height/2)+50, 300, 100, BEIGE, False), Platform(50, (screen_height/2)+200, 900, 100, BEIGE, False), Platform(970, 50, 30, 400, BEIGE, False)],
+          2: [Platform(0, 100, 300, 30, BEIGE, False), Platform(0, 130, 300, 570, RED, True), Platform(0, 320, 330, 150, RED, True), Platform(400, 0, 880, 600, (250, 0, 0), True), Platform(370, 580, 400, 20, (250, 0, 0), True), Platform(300, 650, 980, 50, BEIGE, False)],
+          3: [Platform(0, 100, 300, 600, BEIGE, False), Platform(300, 500, 980, 200, BEIGE, False)],
+          4: [Platform(0, 100, 300, 600, BEIGE, False), Platform(350, 0, 930, 400, RED, True), Platform(350, 450, 250, 20, BEIGE, False), Platform(650, 0, 630, 550, RED, True), Platform(650, 600, 630, 20, BEIGE, False)],
+          5: [Platform(0, 650, 200, 50, BEIGE, False), Platform(200, 650, 150, 50, RED, True), Platform(350, 650, 200, 50, BEIGE, False), Platform(550, 650, 150, 50, RED, True), Platform(700, 650, 200, 50, BEIGE, False), Platform(900, 650, 150, 50, RED, True), Platform(1050, 650, 230, 50, BEIGE, False)],
+          6: [Platform(0, 400, 300, 10, BEIGE, False), Platform(550, 400, 300, 10, BEIGE, False), Platform(1100, 400, 180, 10, BEIGE, False)],
+          7: [Platform(0, 100, 300, 100, BEIGE, False), Platform(300, 100, 980, 100, RED, True), Platform(0, 600, 1280, 100, BEIGE, False)],
+          8: [Platform(0, 600, 1280, 100, BEIGE, False)]}
+
 
 lives = 3
 enemies = []
@@ -192,12 +202,18 @@ while True:
         else:
             lives -= 1
             restart()
-    if level == 3:
-        if len(enemies) == 0:
+    if len(enemies) == 0:
+        if level == 3:
             enemies = [Enemy((screen_width/2)-190, screen_height /
-                             2, 0.5, 0, (255, 0, 0), 35, 550, 3, True)]
+                             2, 0.5, 0, RED, 35, 550, 3, True, True)]
+        if level == 5:
+            enemies = [Enemy(350, 615, 0.5, 0, RED, 35, 165, 3, False, True), Enemy(
+                787.5, 615, 0.4, 0, RED, 35, 0, 0, True, False)]
     if player.rect.right >= screen_width:
-        level += 1
+        if level == max(levels.keys()):
+            level = 1
+        else:
+            level += 1
         player.rect.x = startPos[level][0]
         player.rect.y = startPos[level][1]
         enemies = []
@@ -270,6 +286,18 @@ while True:
     if level == 3:
         put_text(30, 'DONT TOUCH ENEMIES', gamefont,
                  screen, (screen_width/2) + 175, (screen_height/2)-175)
+    if level == 5:
+        put_text(30, 'HEHE, LOTS OF ENEMIES', gamefont,
+                 screen, (screen_width/2), (screen_height/2) + 150)
+    if level == 6:
+        put_text(30, 'HARD JUMPS D:', gamefont,
+                 screen, (screen_width/2), (screen_height/2) - 200)
+    if level == 7:
+        put_text(30, 'HOW?', gamefont,
+                 screen, (screen_width/2), (screen_height/2))
+    if level == 8:
+        put_text(50, 'VICTORY! GO TO THE RIGHT TO RESTART', gamefont,
+                 screen, screen_width/2, (screen_height/2) - 50)
 
     for item in enemies:
         item.draw(screen)
